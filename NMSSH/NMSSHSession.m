@@ -171,7 +171,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
     
     char *message;
     int error = libssh2_session_last_error(self.rawSession, &message, NULL, 0);
-    if (error == 0 && message == NULL) {
+    if (error == LIBSSH2_ERROR_NONE) {
         return nil;
     }
 
