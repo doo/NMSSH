@@ -3,11 +3,15 @@
 #import "NMSSHConfig.h"
 #import "NMSSHHostConfig.h"
 
+NSString *NMSSHSessionLibSSHErrorDomain = @"NMSSHSessionLibSSHErrorDomain";
+NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
+
 @interface NMSSHSession ()
 @property (nonatomic, assign) LIBSSH2_AGENT *agent;
 
 @property (nonatomic, assign, getter = rawSession) LIBSSH2_SESSION *session;
 @property (nonatomic, readwrite, getter = isConnected) BOOL connected;
+@property (nonatomic, strong) NSError *lastConnectionError;
 @property (nonatomic, strong) NSString *host;
 @property (nonatomic, strong) NSString *username;
 
@@ -157,14 +161,21 @@
 }
 
 - (NSError *)lastError {
+    if (self.rawSession == nil && self.lastConnectionError != nil) {
+        return self.lastConnectionError;
+    }
+    
     if(!self.rawSession) {
-        return [NSError errorWithDomain:@"libssh2" code:LIBSSH2_ERROR_NONE userInfo:@{NSLocalizedDescriptionKey : @"Error retrieving last session error due to absence of an active session."}];
+        return nil;
     }
     
     char *message;
     int error = libssh2_session_last_error(self.rawSession, &message, NULL, 0);
+    if (error == 0 && message == NULL) {
+        return nil;
+    }
 
-    return [NSError errorWithDomain:@"libssh2"
+    return [NSError errorWithDomain:NMSSHSessionLibSSHErrorDomain
                                code:error
                            userInfo:@{ NSLocalizedDescriptionKey: [NSString stringWithUTF8String:message] }];
 }
@@ -188,6 +199,8 @@
 }
 
 - (BOOL)connectWithTimeout:(NSNumber *)timeout {
+    self.lastConnectionError = nil;
+    
     if (self.isConnected) {
         [self disconnect];
     }
@@ -278,11 +291,15 @@
             NMSSHLogInfo(@"Socket connection to %@ on port %ld succesful", ipAddress, (long)port);
         }
     }
-
+    
     if (error) {
+        self.lastConnectionError = [NSError errorWithDomain:NMSSHSessionSocketErrorDomain
+                                                       code:error
+                                                   userInfo:@{NSLocalizedDescriptionKey:
+                                                                  @"Failure establishing connection. Check your internet connection."}];
         NMSSHLogError(@"Failure establishing socket connection");
         [self disconnect];
-
+        
         return NO;
     }
 
@@ -304,7 +321,6 @@
     if (libssh2_session_handshake(self.session, CFSocketGetNative(_socket))) {
         NMSSHLogError(@"Failure establishing SSH session");
         [self disconnect];
-
         return NO;
     }
 

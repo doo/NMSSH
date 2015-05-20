@@ -2,6 +2,9 @@
 
 @class NMSSHHostConfig;
 
+extern NSString *NMSSHSessionLibSSHErrorDomain;
+extern NSString *NMSSHSessionSocketErrorDomain;
+
 typedef NS_ENUM(NSInteger, NMSSHSessionHash) {
     NMSSHSessionHashMD5,
     NMSSHSessionHashSHA1
@@ -147,7 +150,7 @@ typedef NS_ENUM(NSInteger, NMSSHKnownHostStatus) {
 /** Timeout for libssh2 blocking functions. */
 @property (nonatomic, strong) NSNumber *timeout;
 
-/** Last session error. */
+/** Last session error. May return nil, if there is no errors. */
 @property (nonatomic, readonly) NSError *lastError;
 
 /** The hash algorithm to use to encode the fingerprint during connection, default value is NMSSHSessionHashMD5. */
