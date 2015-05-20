@@ -215,15 +215,15 @@
     // Fetch response from output buffer
     NSMutableString *response = [[NSMutableString alloc] init];
     for (;;) {
-        ssize_t rc;
+        ssize_t readResult;
         char buffer[self.bufferSize];
         char errorBuffer[self.bufferSize];
 
         do {
-            rc = libssh2_channel_read(self.channel, buffer, (ssize_t)sizeof(buffer));
+            readResult = libssh2_channel_read(self.channel, buffer, (ssize_t)sizeof(buffer));
 
-            if (rc > 0) {
-                [response appendFormat:@"%@", [[NSString alloc] initWithBytes:buffer length:rc encoding:NSUTF8StringEncoding]];
+            if (readResult > 0) {
+                [response appendFormat:@"%@", [[NSString alloc] initWithBytes:buffer length:readResult encoding:NSUTF8StringEncoding]];
             }
 
             // Store all errors that might occur
@@ -245,9 +245,9 @@
                 }
             }
 
-            if (libssh2_channel_eof(self.channel) == 1 || rc == 0) {
-                while ((rc  = libssh2_channel_read(self.channel, buffer, (ssize_t)sizeof(buffer))) > 0) {
-                    [response appendFormat:@"%@", [[NSString alloc] initWithBytes:buffer length:rc encoding:NSUTF8StringEncoding] ];
+            if (libssh2_channel_eof(self.channel) == 1 || readResult == 0) {
+                while ((readResult  = libssh2_channel_read(self.channel, buffer, (ssize_t)sizeof(buffer))) > 0) {
+                    [response appendFormat:@"%@", [[NSString alloc] initWithBytes:buffer length:readResult encoding:NSUTF8StringEncoding] ];
                 }
 
                 [self setLastResponse:[response copy]];
@@ -268,8 +268,8 @@
                                              userInfo:userInfo];
                 }
 
-                while ((rc  = libssh2_channel_read(self.channel, buffer, (ssize_t)sizeof(buffer))) > 0) {
-                    [response appendFormat:@"%@", [[NSString alloc] initWithBytes:buffer length:rc encoding:NSUTF8StringEncoding] ];
+                while ((readResult  = libssh2_channel_read(self.channel, buffer, (ssize_t)sizeof(buffer))) > 0) {
+                    [response appendFormat:@"%@", [[NSString alloc] initWithBytes:buffer length:readResult encoding:NSUTF8StringEncoding] ];
                 }
 
                 [self setLastResponse:[response copy]];
@@ -277,7 +277,7 @@
 
                 return self.lastResponse;
             }
-        } while (rc > 0);
+        } while (readResult > 0);
 
         if (rc != LIBSSH2_ERROR_EAGAIN) {
             break;
