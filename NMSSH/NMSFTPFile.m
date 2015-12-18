@@ -79,10 +79,12 @@
     char bits[11];
     
     bits[0] = [self filetypeletter:mode];
-    strcpy(&bits[1], rwx[(mode >> 6)& 7]);
-    strcpy(&bits[4], rwx[(mode >> 3)& 7]);
-    strcpy(&bits[7], rwx[(mode & 7)]);
-
+    
+    int size = 4*sizeof(char);
+    strlcpy(&bits[1], rwx[(mode >> 6)& 7],  size);
+    strlcpy(&bits[4], rwx[(mode >> 3)& 7],  size);
+    strlcpy(&bits[7], rwx[(mode & 7)],      size);
+    
     if (mode & S_ISUID) {
         bits[3] = (mode & 0100) ? 's' : 'S';
     }
