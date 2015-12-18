@@ -6,7 +6,7 @@
 @property (nonatomic, assign) LIBSSH2_CHANNEL *channel;
 
 @property (nonatomic, readwrite) NMSSHChannelType type;
-@property (nonatomic, assign) const char *ptyTerminalName;
+@property (nonatomic, assign, readonly) const char *ptyTerminalName;
 @property (nonatomic, strong) NSString *lastResponse;
 
 #if OS_OBJECT_USE_OBJC
