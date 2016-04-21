@@ -102,12 +102,26 @@
 }
 
 - (BOOL)createDirectoryAtPath:(NSString *)path {
-    int rc = libssh2_sftp_mkdir(self.sftpSession, [path UTF8String],
-                                LIBSSH2_SFTP_S_IRWXU|
-                                LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IXGRP|
-                                LIBSSH2_SFTP_S_IROTH|LIBSSH2_SFTP_S_IXOTH);
+    
+    NSArray *subPaths = [path componentsSeparatedByString:@"/"];
+    NSString *creationPath = @"/";
 
-    return rc == 0;
+    for (NSInteger i = 0; i < subPaths.count; i++) {
+        if ([subPaths[i] length] == 0) {
+            continue;
+        }
+        creationPath = [creationPath stringByAppendingPathComponent:subPaths[i]];
+        if (![self directoryExistsAtPath:creationPath]) {
+            int error = libssh2_sftp_mkdir(self.sftpSession, [creationPath UTF8String],
+                                           LIBSSH2_SFTP_S_IRWXU|
+                                           LIBSSH2_SFTP_S_IRGRP|LIBSSH2_SFTP_S_IXGRP|
+                                           LIBSSH2_SFTP_S_IROTH|LIBSSH2_SFTP_S_IXOTH);
+            if (error != 0) {
+                return NO;
+            }
+        }
+    }
+    return YES;
 }
 
 - (BOOL)removeDirectoryAtPath:(NSString *)path {
