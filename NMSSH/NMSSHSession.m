@@ -21,6 +21,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
 @property (nonatomic, strong) NMSFTP *sftp;
 @property (nonatomic, strong) NSNumber *port;
 @property (nonatomic, strong) NMSSHHostConfig *hostConfig;
+@property (nonatomic, assign) LIBSSH2_SESSION *sessionToFree;
 @end
 
 @implementation NMSSHSession
@@ -104,6 +105,12 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
     }
 
     return [NSURL URLWithString:[@"ssh://" stringByAppendingString:host]];
+}
+
+- (void)dealloc {
+    if (self.sessionToFree) {
+        libssh2_session_free(self.sessionToFree);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -368,7 +375,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
 
     if (self.session) {
         libssh2_session_disconnect(self.session, "NMSSH: Disconnect");
-        libssh2_session_free(self.session);
+        [self setSessionToFree:self.session];
         [self setSession:NULL];
     }
 
@@ -378,7 +385,6 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
         _socket = NULL;
     }
 
-    libssh2_exit();
     NMSSHLogVerbose(@"Disconnected");
     [self setConnected:NO];
 }
@@ -437,6 +443,37 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
                                                     [self.username UTF8String],
                                                     pubKey,
                                                     privKey,
+                                                    [password UTF8String]);
+
+    if (error) {
+        NMSSHLogError(@"Public key authentication failed with reason %i", error);
+        return NO;
+    }
+
+    NMSSHLogVerbose(@"Public key authentication succeeded.");
+
+    return self.isAuthorized;
+}
+
+- (BOOL)authenticateByInMemoryPublicKey:(NSString *)publicKey
+                             privateKey:(NSString *)privateKey
+                            andPassword:(NSString *)password {
+    if (![self supportsAuthenticationMethod:@"publickey"]) {
+        return NO;
+    }
+
+    if (password == nil) {
+        password = @"";
+    }
+
+    // Try to authenticate with key pair and password
+    int error = libssh2_userauth_publickey_frommemory(self.session,
+                                                    [self.username UTF8String],
+                                                    [self.username length],
+                                                    [publicKey UTF8String] ?: nil,
+                                                    [publicKey length] ?: 0,
+                                                    [privateKey UTF8String] ?: nil,
+                                                    [privateKey length] ?: 0,
                                                     [password UTF8String]);
 
     if (error) {
