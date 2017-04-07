@@ -330,6 +330,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
         [self disconnect];
         return NO;
     }
+    
     if (libssh2_session_handshake(self.session, CFSocketGetNative(_socket))) {
         NMSSHLogError(@"Failure establishing SSH session");
         [self disconnect];
