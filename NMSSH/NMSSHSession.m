@@ -325,6 +325,11 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
     }
 
     // Start the session
+    if (self.session == nil || _socket == nil) {
+        NMSSHLogError(@"Socket or sesion is nil");
+        [self disconnect];
+        return NO;
+    }
     if (libssh2_session_handshake(self.session, CFSocketGetNative(_socket))) {
         NMSSHLogError(@"Failure establishing SSH session");
         [self disconnect];
