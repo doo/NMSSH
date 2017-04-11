@@ -238,6 +238,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
 
     while (addresses && ++index < [addresses count] && error) {
         NSData *addressData = addresses[index];
+        NSData *addressDataToUse;
         NSString *ipAddress;
 
         // IPv4
@@ -253,6 +254,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
             inet_ntop(AF_INET, &(address4.sin_addr), str, INET_ADDRSTRLEN);
             ipAddress = [NSString stringWithCString:str encoding:NSUTF8StringEncoding];
             addressFamily = AF_INET;
+            addressDataToUse = [NSData dataWithBytes:address length:address->ss_len];
         } // IPv6
         else if([addressData length] == sizeof(struct sockaddr_in6)) {
             struct sockaddr_in6 address6;
@@ -266,7 +268,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
             inet_ntop(AF_INET6, &(address6.sin6_addr), str, INET6_ADDRSTRLEN);
             ipAddress = [NSString stringWithCString:str encoding:NSUTF8StringEncoding];
             addressFamily = AF_INET6;
-            
+            addressDataToUse = [NSData dataWithBytes:address length:address->ss_len];
         }
         else {
             NMSSHLogVerbose(@"Unknown address, it's not IPv4 or IPv6!");
@@ -288,8 +290,7 @@ NSString *NMSSHSessionSocketErrorDomain = @"NMSSHSessionSocketErrorDomain";
             return NO;
         }
         
-        
-        error = CFSocketConnectToAddress(_socket, (__bridge CFDataRef)[NSData dataWithBytes:address length:address->ss_len], [timeout doubleValue]);
+        error = CFSocketConnectToAddress(_socket, (__bridge CFDataRef)addressDataToUse, [timeout doubleValue]);
 
         if (error) {
             NMSSHLogVerbose(@"Socket connection to %@ on port %ld failed with reason %li, trying next address...", ipAddress, (long)port, error);
