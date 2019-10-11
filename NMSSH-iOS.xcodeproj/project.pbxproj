@@ -585,6 +585,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/NMSSH-iOS/Libraries/lib",
 				);
+				LLVM_LTO = YES_THIN;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "se.ninemuses.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -628,6 +629,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/NMSSH-iOS/Libraries/lib",
 				);
+				LLVM_LTO = YES_THIN;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "se.ninemuses.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -669,6 +671,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/NMSSH-iOS/Libraries/lib",
 				);
+				LLVM_LTO = YES_THIN;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "se.ninemuses.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -944,6 +947,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/NMSSH-iOS/Libraries/lib",
 				);
+				LLVM_LTO = YES_THIN;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "se.ninemuses.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1061,6 +1065,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/NMSSH-iOS/Libraries/lib",
 				);
+				LLVM_LTO = YES_THIN;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = "se.ninemuses.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
